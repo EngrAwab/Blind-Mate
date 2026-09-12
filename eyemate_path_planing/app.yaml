@@ -1,0 +1,7 @@
+name: Eyemate_Path_Planing
+description: ""
+ports: []
+bricks:
+- netwrok_video_input: {}
+- arduino:web_ui: {}
+icon: 😀

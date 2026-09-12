@@ -1,0 +1,6 @@
+services:
+  remote_data_fetcher:
+    image: ghcr.io/arduino/app-bricks/python-apps-base:0.10.1
+    volumes:
+      - .:/app
+    command: ["python3", "/app/python/main.py"]

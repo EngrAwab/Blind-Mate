@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eyemate - AI Assistant</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --text-main: #1f2937; --text-muted: #6b7280; --accent: #3b82f6; }
+        body {
+            background-color: #0f172a;
+            background-image: radial-gradient(at 0% 0%, hsla(253,16%,15%,1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            color: var(--text-main); font-family: 'Inter', sans-serif;
+            margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center;
+            height: 100vh; box-sizing: border-box; overflow: hidden; 
+        }
+        .header { text-align: center; margin-bottom: 20px; color: white; flex-shrink: 0; }
+        .header h1 { font-size: 2.2rem; font-weight: 700; margin: 0; letter-spacing: -1px; }
+        .dashboard { display: flex; gap: 20px; max-width: 1200px; width: 100%; flex: 1; flex-wrap: nowrap; min-height: 0; }
+        .card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; }
+        .video-card { flex: 2; min-width: 0; }
+        .video-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .video-title { font-weight: 700; font-size: 1.1rem; }
+        .live-badge { background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .live-badge::before { content: ''; display: block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .image-wrapper { flex: 1; background: #111827; border-radius: 16px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .placeholder-text { color: #4b5563; font-size: 1.2rem; font-weight: 600; z-index: 1; }
+        img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2; opacity: 0; transition: opacity 0.5s ease; }
+        .data-panel { flex: 1; gap: 16px; min-width: 300px; }
+        .info-block { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .info-label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; padding-left: 4px; }
+        .info-value { font-size: 1.3rem; font-weight: 600; background: #f3f4f6; padding: 16px; border-radius: 16px; flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .ai-output .info-value { background: #eff6ff; color: var(--accent); font-size: 1.6rem; }
+        
+        /* NEW: Hardware Pins UI */
+        .pin-container { display: flex; gap: 6px; justify-content: space-between; }
+        .pin-badge { flex: 1; text-align: center; padding: 8px 0; border-radius: 8px; font-size: 0.75rem; font-weight: 700; background: #fee2e2; color: #ef4444; transition: all 0.2s; }
+        .pin-high { background: #dcfce7; color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="header"><h1>BlindMate Assistant</h1><p>Smart Vision & Navigation</p></div>
+    <div class="dashboard">
+        <div class="card video-card">
+            <div class="video-header"><span class="video-title">Camera Feed</span><span class="live-badge">LIVE</span></div>
+            <div class="image-wrapper"><div class="placeholder-text">WAITING FOR CAMERA...</div><img id="video_feed" src=""></div>
+        </div>
+        <div class="card data-panel">
+            <div class="info-block"><span class="info-label">Remote Command</span><div class="info-value" id="sensorText">Waiting for input...</div></div>
+            <div class="info-block ai-output"><span class="info-label">AI Detection Result</span><div class="info-value" id="aiOutput">System Ready</div></div>
+            
+            <!-- Pins UI -->
+            <div class="info-block" style="flex: 0.5;">
+                <span class="info-label">Hardware Pins (2-5)</span>
+                <div class="pin-container">
+                    <div class="pin-badge" id="pin2">P2<br>LOW</div>
+                    <div class="pin-badge" id="pin3">P3<br>LOW</div>
+                    <div class="pin-badge" id="pin4">P4<br>LOW</div>
+                    <div class="pin-badge" id="pin5">P5<br>LOW</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const socket = io();
+        
+        socket.on('relay_frame', (b64_str) => {
+            const img = document.getElementById('video_feed');
+            img.src = "data:image/jpeg;base64," + b64_str;
+            img.style.opacity = "1";
+        });
+        
+        socket.on('relay_sensor', (data) => { 
+            document.getElementById('sensorText').innerText = data.toUpperCase(); 
+        });
+        
+        socket.on('ui_update', (data) => { 
+            document.getElementById('aiOutput').innerText = data.data; 
+        });
+        
+        // Pin Listener
+        socket.on('pin_update', (data) => {
+            for (let i = 2; i <= 5; i++) {
+                const pinElement = document.getElementById('pin' + i);
+                if (pinElement && data[i]) {
+                    if (data[i] === "HIGH") {
+                        pinElement.innerHTML = "P" + i + "<br>HIGH";
+                        pinElement.className = "pin-badge pin-high";
+                    } else {
+                        pinElement.innerHTML = "P" + i + "<br>LOW";
+                        pinElement.className = "pin-badge";
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

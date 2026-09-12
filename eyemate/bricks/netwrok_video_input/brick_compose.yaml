@@ -1,0 +1,8 @@
+services:
+  Webcam_video:
+    image: ghcr.io/arduino/app-bricks/python-apps-base:0.10.1
+    user: "root"
+    privileged: true
+    volumes:
+      - .:/app
+    command: ["python3", "/app/python/main.py"]

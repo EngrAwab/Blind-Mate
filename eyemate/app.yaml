@@ -1,0 +1,10 @@
+name: Eyemate
+description: ""
+ports: []
+bricks:
+- netwrok_video_input: {}
+- arduino:web_ui: {}
+- remote_data_fetcher: {}
+- arduino:object_detection:
+    model: yolox-object-detection
+icon: 😀
