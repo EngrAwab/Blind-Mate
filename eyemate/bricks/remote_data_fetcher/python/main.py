@@ -16,9 +16,9 @@ while True:
         break
     except Exception as e:
         time.sleep(2)
-
-fetch_url = "http://192.168.43.190:8080"
-post_url = "http://192.168.43.190:8081"
+ip_addr ="192.168.43.190"
+fetch_url = f"http://{ip_addr}:8080"
+post_url = f"http://{ip_addr}:8081"
 
 last_remote_command = ""
 
