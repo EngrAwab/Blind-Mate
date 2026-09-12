@@ -14,7 +14,7 @@ from arduino.app_bricks.object_detection import ObjectDetection
 # CONFIGURATION: URLs
 # ==========================================
 # Change this URL if your external AI VLM server IP changes
-REMOTE_SERVER_URL = "http://100.89.100.36:5000/image-query"
+REMOTE_SERVER_URL = "http://ADD-YOUR-IP:5000/image-query"
 
 web_ui = WebUI()
 object_detection = ObjectDetection()
