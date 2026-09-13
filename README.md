@@ -19,8 +19,7 @@ BlindMate is designed to be affordable and scalable. The entire hardware stack c
 | **Type-C Hub** | 1 | Connects the webcam to the Uno Q |
 | **Power Bank (5V/4.5A)** | 1 | Powers the system for 7+ hours |
 | **Coin Vibration Motors** | 2 | Actuators for the Haptic Navigation Belt |
-| **Custom Remote Shield** | 1 | Tactile user input (buttons wired to GPIO) |
-*(Insert an image of your circuit diagram / schematic here)*
+| **Custom Remote Shield** | 1 | Tactile user input (buttons wired to GPIO) 
 ---
 ## 🧠 System Architecture & The "Dual-Brain" Advantage
 BlindMate maximizes the Arduino Uno Q's unique hardware by splitting workloads across its two processors, ensuring that high-load AI tasks never delay critical safety hardware.
